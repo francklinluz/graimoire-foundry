@@ -1,0 +1,6 @@
+{
+  "GRAIMOIRE.Settings.ServerUrl": "URL do servidor Graimoire",
+  "GRAIMOIRE.Settings.ServerUrlHint": "URL do backend Graimoire",
+  "GRAIMOIRE.Settings.ShowToAll": "Mostrar respostas para todos",
+  "GRAIMOIRE.Settings.ShowToAllHint": "Se ativado, respostas aparecem para toda a mesa"
+}

@@ -1,0 +1,133 @@
+/* ── Graimoire — Foundry Chat Styles ──────────────────────────────── */
+
+.graimoire-message {
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 2px 0;
+  font-family: var(--font-primary, serif);
+}
+
+/* Header */
+.graimoire-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(30, 20, 10, 0.85);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.3);
+}
+
+.graimoire-icon {
+  font-size: 14px;
+}
+
+.graimoire-title {
+  font-family: var(--font-primary, serif);
+  font-weight: bold;
+  font-size: 13px;
+  color: #e8c97a;
+  letter-spacing: 0.03em;
+}
+
+.graimoire-query {
+  font-size: 11px;
+  color: #9e9a8e;
+  font-style: italic;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Body */
+.graimoire-body {
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #e8e4d8;
+  background: rgba(20, 15, 8, 0.75);
+}
+
+.graimoire-answer .graimoire-body {
+  border-left: 2px solid rgba(201, 168, 76, 0.5);
+}
+
+.graimoire-answer .graimoire-body strong {
+  color: #e8c97a;
+  font-weight: bold;
+}
+
+.graimoire-answer .graimoire-body em {
+  color: #9e9a8e;
+}
+
+/* Sources */
+.graimoire-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 6px 10px 8px;
+  background: rgba(20, 15, 8, 0.75);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.graimoire-source {
+  font-size: 10px;
+  background: rgba(74, 158, 142, 0.12);
+  border: 1px solid rgba(74, 158, 142, 0.25);
+  color: #4a9e8e;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+/* Typing indicator */
+.graimoire-typing .graimoire-body {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #9e9a8e;
+  font-style: italic;
+  font-size: 12px;
+}
+
+.graimoire-dots {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.graimoire-dots span {
+  width: 5px;
+  height: 5px;
+  background: #9e9a8e;
+  border-radius: 50%;
+  animation: graimoire-bounce 1.2s ease-in-out infinite;
+}
+
+.graimoire-dots span:nth-child(2) { animation-delay: 0.2s; }
+.graimoire-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes graimoire-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Error */
+.graimoire-error .graimoire-header {
+  background: rgba(40, 15, 10, 0.85);
+  border-bottom-color: rgba(196, 92, 58, 0.3);
+}
+
+.graimoire-error .graimoire-title {
+  color: #e07060;
+}
+
+.graimoire-error .graimoire-body {
+  border-left: 2px solid rgba(196, 92, 58, 0.5);
+  color: #c8b8b0;
+}
+
+.graimoire-error .graimoire-body a {
+  color: #e8c97a;
+  text-decoration: underline;
+}

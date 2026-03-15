@@ -1,0 +1,28 @@
+{
+  "id": "graimoire",
+  "title": "Graimoire — AI Rulebook Assistant",
+  "description": "Consulta inteligente de livros de regras via IA diretamente no chat do Foundry. Digite /graimoire sua pergunta para consultar.",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "12",
+    "verified": "13"
+  },
+  "authors": [
+    {
+      "name": "Graimoire",
+      "url": "https://graimoire-production.up.railway.app"
+    }
+  ],
+  "esmodules": ["graimoire.js"],
+  "styles": ["graimoire.css"],
+  "languages": [
+    {
+      "lang": "pt-BR",
+      "name": "Português (Brasil)",
+      "path": "lang/pt-BR.json"
+    }
+  ],
+  "url": "https://github.com/francklinluz/graimoire-foundry",
+  "manifest": "https://raw.githubusercontent.com/francklinluz/graimoire-foundry/main/module.json",
+  "download": "https://github.com/francklinluz/graimoire-foundry/archive/refs/heads/main.zip"
+}
