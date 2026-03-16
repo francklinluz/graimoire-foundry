@@ -46,7 +46,7 @@ Hooks.once('init', () => {
   });
 
   game.settings.register(MODULE_ID, 'allowedPlayerIds', {
-    name: 'Jogadores com acesso (plano Team)',
+    name: 'Jogadores com acesso (plano Party)',
     hint: 'IDs dos jogadores autorizados a usar /graimoire. GMs sempre têm acesso. Gerencie via "Gerenciar Acesso de Jogadores".',
     scope: 'world',
     config: false,
@@ -116,9 +116,9 @@ function openPlayerAccessManager() {
   if (_planInfo && !_planInfo.can_invite_players) {
     const serverUrl = game.settings.get(MODULE_ID, 'serverUrl').replace(/\/$/, '');
     new Dialog({
-      title: 'Graimoire — Plano Team necessário',
+      title: 'Graimoire — Plano Party necessário',
       content: `
-        <p>O acesso de jogadores ao <code>/graimoire</code> requer o <strong>plano Team</strong>.</p>
+        <p>O acesso de jogadores ao <code>/graimoire</code> requer o <strong>plano Party</strong>.</p>
         <p>Seu plano atual: <strong>${_planInfo.plan}</strong></p>
         <p>Faça upgrade para liberar jogadores da sua mesa.</p>
       `,
@@ -150,7 +150,7 @@ function openPlayerAccessManager() {
     <div style="padding:8px 0">
       <p style="font-size:13px;opacity:0.7;margin-bottom:12px">
         Selecione os jogadores que podem usar <code>/graimoire</code> no chat.
-        Requer plano Team. GMs sempre têm acesso.
+        Requer plano Party. GMs sempre têm acesso.
       </p>
       ${players.length === 0
         ? '<p style="font-size:13px;opacity:0.5;font-style:italic">Nenhum jogador encontrado.</p>'
@@ -186,7 +186,7 @@ function addPlayerAccessButton() {
         <label>Acesso de Jogadores</label>
         <div class="form-fields">
           <button type="button" id="graimoire-manage-players" style="width:auto">
-            Gerenciar Acesso de Jogadores (plano Team)
+            Gerenciar Acesso de Jogadores (plano Party)
           </button>
         </div>
         <p class="notes">Defina quais jogadores podem usar /graimoire além do GM.</p>
@@ -378,7 +378,7 @@ async function showAccessDenied() {
       </div>
       <div class="graimoire-body">
         Você não tem acesso ao /graimoire.<br>
-        O plano Team libera o comando para jogadores da mesa.<br><br>
+        O plano Party libera o comando para jogadores da mesa.<br><br>
         <a href="${serverUrl}" target="_blank">Ver planos →</a>
       </div>
     </div>`;
