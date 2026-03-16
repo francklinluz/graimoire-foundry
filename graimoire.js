@@ -42,6 +42,15 @@ Hooks.once('init', () => {
     default: true,
   });
 
+  game.settings.register(MODULE_ID, 'allowedPlayerIds', {
+    name: 'Jogadores com acesso (plano Team)',
+    hint: 'IDs dos jogadores autorizados a usar /graimoire. GMs sempre têm acesso. Gerencie via "Gerenciar Acesso de Jogadores".',
+    scope: 'world',
+    config: false,
+    type: String,
+    default: '[]',
+  });
+
   console.log(`${MODULE_NAME} | Módulo inicializado`);
 });
 
@@ -53,8 +62,105 @@ Hooks.once('ready', () => {
     if (!url) {
       ui.notifications.warn('Graimoire: configure a URL do servidor em Configurações do Módulo.');
     }
+    addPlayerAccessButton();
   }
 });
+
+// ── Access control ─────────────────────────────────────────────────────
+function userHasAccess(user) {
+  if (user.isGM) return true;
+  try {
+    const allowed = JSON.parse(game.settings.get(MODULE_ID, 'allowedPlayerIds') || '[]');
+    return allowed.includes(user.id);
+  } catch {
+    return false;
+  }
+}
+
+function getAllowedPlayerIds() {
+  try {
+    return JSON.parse(game.settings.get(MODULE_ID, 'allowedPlayerIds') || '[]');
+  } catch {
+    return [];
+  }
+}
+
+async function setAllowedPlayerIds(ids) {
+  await game.settings.set(MODULE_ID, 'allowedPlayerIds', JSON.stringify(ids));
+}
+
+// ── Player Access Manager Dialog (GM only) ─────────────────────────────
+function openPlayerAccessManager() {
+  const players = game.users.filter(u => !u.isGM);
+  const allowed = getAllowedPlayerIds();
+
+  const playerRows = players.map(u => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.1)">
+      <input type="checkbox" id="player-${u.id}" value="${u.id}"
+        ${allowed.includes(u.id) ? 'checked' : ''}
+        style="width:16px;height:16px;cursor:pointer" />
+      <label for="player-${u.id}" style="cursor:pointer;flex:1">
+        ${u.name}
+        <span style="font-size:11px;opacity:0.5;margin-left:6px">${u.id}</span>
+      </label>
+    </div>
+  `).join('');
+
+  const content = `
+    <div style="padding:8px 0">
+      <p style="font-size:13px;opacity:0.7;margin-bottom:12px">
+        Selecione os jogadores que podem usar <code>/graimoire</code> no chat.
+        Requer plano Team. GMs sempre têm acesso.
+      </p>
+      ${players.length === 0
+        ? '<p style="font-size:13px;opacity:0.5;font-style:italic">Nenhum jogador encontrado.</p>'
+        : playerRows
+      }
+    </div>`;
+
+  new Dialog({
+    title: 'Graimoire — Acesso de Jogadores',
+    content,
+    buttons: {
+      save: {
+        label: 'Salvar',
+        callback: async (html) => {
+          const checked = [...html.find('input[type=checkbox]:checked')].map(el => el.value);
+          await setAllowedPlayerIds(checked);
+          ui.notifications.info(`Graimoire: acesso atualizado para ${checked.length} jogador(es).`);
+        },
+      },
+      cancel: { label: 'Cancelar' },
+    },
+    default: 'save',
+  }).render(true);
+}
+
+function addPlayerAccessButton() {
+  Hooks.on('renderSettingsConfig', (app, html) => {
+    const moduleSection = html.find(`section[data-category="${MODULE_ID}"]`);
+    if (!moduleSection.length) return;
+
+    const btn = $(`
+      <div class="form-group">
+        <label>Acesso de Jogadores</label>
+        <div class="form-fields">
+          <button type="button" id="graimoire-manage-players" style="width:auto">
+            Gerenciar Acesso de Jogadores (plano Team)
+          </button>
+        </div>
+        <p class="notes">Defina quais jogadores podem usar /graimoire além do GM.</p>
+      </div>
+    `);
+
+    btn.find('button').on('click', (e) => {
+      e.preventDefault();
+      openPlayerAccessManager();
+    });
+
+    moduleSection.find('.form-group').last().after(btn);
+  });
+}
 
 // ── Chat command interceptor ───────────────────────────────────────────
 Hooks.on('chatMessage', (chatLog, message, chatData) => {
@@ -68,6 +174,11 @@ Hooks.on('chatMessage', (chatLog, message, chatData) => {
 
   if (!question) {
     ui.notifications.warn('Graimoire: digite uma pergunta após /graimoire');
+    return false;
+  }
+
+  if (!userHasAccess(game.user)) {
+    showAccessDenied();
     return false;
   }
 
@@ -207,6 +318,29 @@ async function showError(message, showToAll) {
         <span class="graimoire-title">Graimoire</span>
       </div>
       <div class="graimoire-body">⚠️ ${escapeHtml(message)}</div>
+    </div>`;
+
+  await ChatMessage.create({
+    content,
+    speaker: { alias: 'Graimoire' },
+    whisper: [game.user.id],
+    flags: { [MODULE_ID]: { type: 'error' } },
+  });
+}
+
+async function showAccessDenied() {
+  const serverUrl = game.settings.get(MODULE_ID, 'serverUrl').replace(/\/$/, '');
+  const content = `
+    <div class="graimoire-message graimoire-error">
+      <div class="graimoire-header">
+        <span class="graimoire-icon">📖</span>
+        <span class="graimoire-title">Graimoire — Acesso negado</span>
+      </div>
+      <div class="graimoire-body">
+        Você não tem acesso ao /graimoire.<br>
+        O plano Team libera o comando para jogadores da mesa.<br><br>
+        <a href="${serverUrl}" target="_blank">Ver planos →</a>
+      </div>
     </div>`;
 
   await ChatMessage.create({
