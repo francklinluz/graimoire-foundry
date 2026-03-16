@@ -24,6 +24,15 @@ Hooks.once('init', () => {
     default: '',
   });
 
+  game.settings.register(MODULE_ID, 'apiKey', {
+    name: 'API Key do Graimoire',
+    hint: 'Gere sua chave em graimoire-production.up.railway.app → perfil. Necessária para usar o módulo.',
+    scope: 'world',
+    config: true,
+    type: String,
+    default: '',
+  });
+
   game.settings.register(MODULE_ID, 'showToAll', {
     name: 'Mostrar respostas para todos',
     hint: 'Se ativado, as respostas aparecem para todos os jogadores. Se desativado, só para quem perguntou.',
@@ -79,9 +88,13 @@ async function handleGraimoireQuery(question, chatData) {
 
   try {
     // Call Graimoire API
+    const apiKey = game.settings.get(MODULE_ID, 'apiKey');
     const response = await fetch(`${serverUrl}/api/foundry/query`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(apiKey ? { 'X-API-Key': apiKey } : {}),
+      },
       credentials: 'include',
       body: JSON.stringify({ question }),
     });
