@@ -4,6 +4,9 @@
 const MODULE_ID  = 'graimoire';
 const MODULE_NAME = 'Graimoire';
 
+// Plan info fetched from server on ready (GM only)
+let _planInfo = null;
+
 // ── Settings ───────────────────────────────────────────────────────────
 Hooks.once('init', () => {
   game.settings.register(MODULE_ID, 'serverUrl', {
@@ -61,10 +64,29 @@ Hooks.once('ready', () => {
     const url = game.settings.get(MODULE_ID, 'serverUrl');
     if (!url) {
       ui.notifications.warn('Graimoire: configure a URL do servidor em Configurações do Módulo.');
+    } else {
+      fetchPlanInfo(url);
     }
     addPlayerAccessButton();
   }
 });
+
+async function fetchPlanInfo(serverUrl) {
+  const url = (serverUrl || game.settings.get(MODULE_ID, 'serverUrl')).replace(/\/$/, '');
+  const apiKey = game.settings.get(MODULE_ID, 'apiKey');
+  try {
+    const res = await fetch(`${url}/api/foundry/info`, {
+      headers: { ...(apiKey ? { 'X-API-Key': apiKey } : {}) },
+      credentials: 'include',
+    });
+    if (res.ok) {
+      _planInfo = await res.json();
+      console.log(`${MODULE_NAME} | Plano: ${_planInfo.plan}`);
+    }
+  } catch (err) {
+    console.warn(`${MODULE_NAME} | Não foi possível buscar informações do plano:`, err.message);
+  }
+}
 
 // ── Access control ─────────────────────────────────────────────────────
 function userHasAccess(user) {
@@ -91,6 +113,24 @@ async function setAllowedPlayerIds(ids) {
 
 // ── Player Access Manager Dialog (GM only) ─────────────────────────────
 function openPlayerAccessManager() {
+  if (_planInfo && !_planInfo.can_invite_players) {
+    const serverUrl = game.settings.get(MODULE_ID, 'serverUrl').replace(/\/$/, '');
+    new Dialog({
+      title: 'Graimoire — Plano Team necessário',
+      content: `
+        <p>O acesso de jogadores ao <code>/graimoire</code> requer o <strong>plano Team</strong>.</p>
+        <p>Seu plano atual: <strong>${_planInfo.plan}</strong></p>
+        <p>Faça upgrade para liberar jogadores da sua mesa.</p>
+      `,
+      buttons: {
+        upgrade: { label: 'Ver planos', callback: () => window.open(serverUrl, '_blank') },
+        cancel:  { label: 'Fechar' },
+      },
+      default: 'upgrade',
+    }).render(true);
+    return;
+  }
+
   const players = game.users.filter(u => !u.isGM);
   const allowed = getAllowedPlayerIds();
 
